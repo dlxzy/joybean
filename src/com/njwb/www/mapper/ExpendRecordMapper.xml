@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间  用于区分不同xml文件中的id
+一般使用包名+类名-->
+<mapper namespace="com.njwb.www.mapper.ExpendRecordMapper">
+	<!--将从数据库表中查询的数据映射到对应的实体类中 
+	id随意写，要和下面的resultMap的值保持一致
+	type：具体的返回类型 -->
+	<resultMap type="ExpendRecordWrapper" id="ExpendRecordWrapper">
+		<id property="erId" column="er_Id"/>
+		<result property="erGId" column="er_GId"/>
+		<result property="erConsumeAmount" column="er_ConsumeAmount"/>	
+		<result property="erPurchaseWays" column="er_PurchaseWays"/>
+		<result property="erGiftJoybeanAmount" column="er_GiftJoybeanAmount"/>
+		<result property="erUId" column="er_UId"/>
+		<result property="erPurchaseTime" column="er_PurchaseTime"/>
+		<association property="game" javaType="Game" column="er_GId">
+			<id property="gId" column="g_Id"/>
+			<result property="gName" column="g_Name"/>
+			<result property="gGTId" column="g_GTId"/>	
+			<result property="gPicture" column="g_Picture"/>
+			<result property="gState" column="g_State"/>
+			<result property="gDetails" column="g_Details"/>
+			<result property="gJoybeanPrice" column="g_JoybeanPrice"/>
+			<result property="gPhonePrice" column="g_PhonePrice"/>
+			<result property="gCreateTime" column="g_CreateTime"/>
+			<result property="gCrId" column="g_CrId"/>
+			<result property="gUpdateTime" column="g_UpdateTime"/>
+			<result property="gUpId" column="g_UpId"/>
+		</association>
+	</resultMap>
+	
+	
+	<!-- id随意命名，必须保证在同一个xml中唯一 
+	如果sql需要用到传入参数 parameterType
+	此处传Dept，包名+类名
+	#{}是占位符的意思-->
+	<insert id="addExpendRecord" parameterType="ExpendRecord">
+		insert into t_expendRecord_yl(er_Id,er_GId,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime) 
+		values(seq_t_expendRecord_yl.nextval,#{erGId},#{erConsumeAmount},#{erPurchaseWays},#{erGiftJoybeanAmount},#{erUId},sysdate)
+	</insert>
+	
+	<!--parameterType表示传参
+	resultMap表示返回类型  -->
+	<select id="queryExpendRecordWrapperByErUIdAndErGId" parameterType="Map" resultMap="ExpendRecordWrapper">
+		select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime 
+		from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id where ter.er_UId = #{erUId} and ter.er_GId = #{erGId}
+	</select>
+	
+	<select id="queryExpendRecordWrapperByErId" parameterType="int" resultMap="ExpendRecordWrapper">
+		select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime 
+		from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id where er_Id = #{erId}
+	</select>
+	
+	<select id="queryCountByErUId" parameterType="int" resultType="int">
+		select count(*) from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id where er_UId = #{erUId}
+	</select>
+	
+	<select id="queryAllByErUIdByPage" parameterType="Map" resultMap="ExpendRecordWrapper">
+		select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime 
+		from(select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime,rownum as rn 
+		from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id where er_UId = #{erUId} order by er_Id)
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryCountByErUIdAndGNameAndErPurchaseWays" parameterType="Map" resultType="int">
+		select count(*) from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id
+			<where>
+				<if test="erUId != null">
+					and ter.er_UId = #{erUId}
+				</if>
+				<if test="gName != null">
+					and tg.g_Name like #{gName}
+				</if>
+				<if test="erPurchaseWays != null">
+					and ter.er_PurchaseWays like #{erPurchaseWays}
+				</if>
+			</where>
+	</select>
+	
+	<select id="queryAllByErUIdAndGNameAndErPurchaseWaysByPage" parameterType="Map" resultMap="ExpendRecordWrapper">
+		select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime 
+		from(select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime,rownum as rn 
+		from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id 
+			<where>
+				<if test="erUId != null">
+					and ter.er_UId = #{erUId}
+				</if>
+				<if test="gName != null">
+					and tg.g_Name like #{gName}
+				</if>
+				<if test="erPurchaseWays != null">
+					and ter.er_PurchaseWays like #{erPurchaseWays}
+				</if>
+			</where>	
+		order by er_Id)
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryAllExpendRecordWrapperByErUId" parameterType="int" resultMap="ExpendRecordWrapper">
+		select er_Id,er_GId,g_Name,er_ConsumeAmount,er_PurchaseWays,er_GiftJoybeanAmount,er_UId,er_PurchaseTime 
+		from t_expendRecord_yl ter inner join t_game_yl tg on ter.er_GId = tg.g_Id where er_UId = #{erUId}
+	</select>
+</mapper>

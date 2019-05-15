@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="joybean"
+  id="myeclipse.1547005449726"
+  context-root="/joybean"
+  j2ee-spec="5.0"
+  archive="joybean.war">
+  <attributes>
+    <attribute name="webrootdir" value="/WebRoot" />
+  </attributes>
+</project-module>
+

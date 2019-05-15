@@ -1,0 +1,107 @@
+@CHARSET "UTF-8";
+
+ul {
+	list-style: none;
+}
+
+#mainDiv {
+	border: 1px solid black;
+	width: 950px;
+	margin: 50px auto;
+
+}
+
+#header {
+	border: 1px solid black;
+	height: 60px;
+	margin:20px 20px;
+	line-height: 30px;
+	font-size: 21px;
+}
+
+#userDiv {
+	margin: 15px 10px;
+}
+
+#logoDiv {
+	margin: 15px 10px;
+}
+
+#dateDiv{
+	margin: 15px 10px;
+}
+
+#exitDiv {
+	width:60px;
+	margin: 15px 10px;
+	background-color: #2299EE;
+	text-align: center;
+	
+}
+
+#exitDiv span{
+	color:white;
+}
+
+.lft {
+	float: left;
+}
+
+.rft {
+	float: right;
+}
+
+#contentDiv {
+	height: 470px;
+}
+
+#content-left {
+	width: 158px;
+	height: 470px;
+	text-align: center;
+}
+
+.menu {
+	
+	color: #616378;
+	font-size: 20px;
+	font-weight: bolder;
+	margin: 0px 20px 40px 20px;
+	
+}
+
+.menu-sub {
+	color: #616366;
+	font-size: 14px;
+	font-weight: normal;
+	height: 40px;
+	line-height: 40px;
+	margin-left: 30px;
+}
+
+.menu-sub:hover {
+	cursor: pointer;
+}
+
+#content-right {
+	border: 1px solid black;
+	width: 750px;
+	height: 470px;
+	background-color: #EDEFF0;
+}
+
+#footer {
+	height: 40px;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link {
+	color: #616366;
+}
+
+a:visited {
+	color: #616366;
+}

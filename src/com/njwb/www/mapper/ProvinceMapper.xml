@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间  用于区分不同xml文件中的id
+一般使用包名+类名-->
+<mapper namespace="com.njwb.www.mapper.ProvinceMapper">
+	<!--将从数据库表中查询的数据映射到对应的实体类中 
+	id随意写，要和下面的resultMap的值保持一致
+	type：具体的返回类型 -->
+	<resultMap type="Province" id="Province">
+		<id property="pId" column="p_Id"/>
+		<result property="pAreaCode" column="p_AreaCode"/>
+		<result property="pDistrictName" column="p_DistrictName"/>
+	</resultMap>
+	
+	<!-- id随意命名，必须保证在同一个xml中唯一 
+	如果sql需要用到传入参数 parameterType
+	此处传Dept，包名+类名
+	#{}是占位符的意思-->
+
+	<!--parameterType表示传参
+	resultMap表示返回类型  -->
+	<select id="queryProvinceByPId" parameterType="int" resultMap="Province">
+		select p_Id,p_AreaCode,p_DistrictName from t_province_yl where p_Id = #{pId}
+	</select>
+	
+	<select id="queryProvinceByPDistrictName" parameterType="String" resultMap="Province">
+		select p_Id,p_AreaCode,p_DistrictName from t_province_yl where p_DistrictName = #{pDistrictName}
+	</select>	
+	
+	<select id="queryAllProvince" resultMap="Province">
+		select p_Id,p_AreaCode,p_DistrictName from t_province_yl
+	</select>
+</mapper>

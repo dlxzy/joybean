@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间  用于区分不同xml文件中的id
+一般使用包名+类名-->
+<mapper namespace="com.njwb.www.mapper.GameMapper">
+	<!--将从数据库表中查询的数据映射到对应的实体类中 
+	id随意写，要和下面的resultMap的值保持一致
+	type：具体的返回类型 -->
+	<resultMap type="GameWrapper" id="GameWrapper">
+		<id property="gId" column="g_Id"/>
+		<result property="gName" column="g_Name"/>
+		<result property="gGTId" column="g_GTId"/>	
+		<result property="gPicture" column="g_Picture"/>
+		<result property="gState" column="g_State"/>
+		<result property="gDetails" column="g_Details"/>
+		<result property="gJoybeanPrice" column="g_JoybeanPrice"/>
+		<result property="gPhonePrice" column="g_PhonePrice"/>
+		<result property="gCreateTime" column="g_CreateTime"/>
+		<result property="gCrId" column="g_CrId"/>
+		<result property="gUpdateTime" column="g_UpdateTime"/>
+		<result property="gUpId" column="g_UpId"/>	
+		<association property="gameType" javaType="GameType" column="g_GTId">
+			<id property="gtId" column="gt_Id"/>
+			<result property="gtName" column="gt_Name"/>
+			<result property="gtState" column="gt_State"/>
+			<result property="gtCreateTime" column="gt_CreateTime"/>
+			<result property="gtUpdateTime" column="gt_UpdateTime"/>
+		</association>
+	</resultMap>
+	
+	<resultMap type="Game" id="Game">
+		<id property="gId" column="g_Id"/>
+		<result property="gName" column="g_Name"/>
+		<result property="gGTId" column="g_GTId"/>	
+		<result property="gPicture" column="g_Picture"/>
+		<result property="gState" column="g_State"/>
+		<result property="gDetails" column="g_Details"/>
+		<result property="gJoybeanPrice" column="g_JoybeanPrice"/>
+		<result property="gPhonePrice" column="g_PhonePrice"/>
+		<result property="gCreateTime" column="g_CreateTime"/>
+		<result property="gCrId" column="g_CrId"/>
+		<result property="gUpdateTime" column="g_UpdateTime"/>
+		<result property="gUpId" column="g_UpId"/>	
+	</resultMap>
+	
+	<!-- id随意命名，必须保证在同一个xml中唯一 
+	如果sql需要用到传入参数 parameterType
+	此处传Dept，包名+类名
+	#{}是占位符的意思-->
+	<insert id="addGame" parameterType="Game">
+		insert into t_game_yl(g_Id,g_Name,g_GTId,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId) 
+		values(seq_t_game_yl.nextval,#{gName},#{gGTId},#{gPicture},#{gState},#{gDetails},#{gJoybeanPrice},#{gPhonePrice},sysdate,#{gCrId},sysdate,#{gUpId})
+	</insert>
+	
+	<update id="updateGameByGId" parameterType="Game">
+		update t_game_yl
+			<set>
+				<if test="null != gName">
+					g_Name = #{gName},
+				</if>
+				<if test="null != gGTId">
+					g_GTId = #{gGTId},
+				</if>
+				<if test="null != gPicture">
+					g_Picture = #{gPicture},
+				</if>
+				<if test="null != gState">
+					g_State = #{gState},
+				</if>
+				<if test="null != gDetails">
+					g_Details = #{gDetails},
+				</if>
+				<if test="null != gJoybeanPrice">
+					g_JoybeanPrice = #{gJoybeanPrice},
+				</if>
+				<if test="null != gPhonePrice">
+					g_PhonePrice = #{gPhonePrice},
+				</if>
+				<if test="null != gUpId">
+					g_UpId = #{gUpId},
+				</if>		
+					g_UpdateTime = sysdate	
+			</set>
+				where g_Id = #{gId}
+	</update>
+	
+	<!--parameterType表示传参
+	resultMap表示返回类型  -->
+	<select id="queryGameWrapperByGId" parameterType="int" resultMap="GameWrapper">
+		select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId
+  		from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id where g_Id = #{gId}
+	</select>
+	
+	<select id="queryGameWrapperByGName" parameterType="String" resultMap="GameWrapper">
+		select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId
+  		from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id where g_Name = #{gName}
+	</select>
+	
+	<select id="queryAllByGtNameAndGState" parameterType="Map" resultMap="GameWrapper">
+		select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId
+  		from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id 
+  		<where>
+  			<if test="gtName != null">
+				and tgt.gt_Name like #{gtName}
+			</if>
+			<if test="gState != null">
+				and tg.g_State like #{gState}
+			</if>		
+		</where>
+	</select>
+	
+	<select id="queryCount" resultType="int">
+		select count(*) from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id
+	</select>
+	
+	<select id="queryAllGameWrapperByPage" parameterType="Map" resultMap="GameWrapper">
+		select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId from 
+		(select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId,rownum as rn 
+		from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id order by g_Id)
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryCountByGNameAndGTName" parameterType="Map" resultType="int">
+		select count(*) from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id
+			<where>
+				<if test="gName != null">
+					and tg.g_Name like #{gName}
+				</if>
+				<if test="gtName != null">
+					and tgt.gt_Name like #{gtName}
+				</if>
+			</where>
+	</select>
+	
+	<select id="queryAllByGNameAndGTNameByPage" parameterType="Map" resultMap="GameWrapper">
+		select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId from 
+		(select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId,rownum as rn 
+		from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id
+			<where>
+				<if test="gName != null">
+					and tg.g_Name like #{gName}
+				</if>
+				<if test="gtName != null">
+					and tgt.gt_Name like #{gtName}
+				</if>
+			</where>	
+		order by g_Id) 
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryAllGameWrapper" resultMap="GameWrapper">
+		select g_Id,g_Name,g_GTId,gt_Name,g_Picture,g_State,g_Details,g_JoybeanPrice,g_PhonePrice,g_CreateTime,g_CrId,g_UpdateTime,g_UpId
+  		from t_game_yl tg inner join t_gameType_yl tgt on tg.g_GTId = tgt.gt_Id
+	</select>
+</mapper>

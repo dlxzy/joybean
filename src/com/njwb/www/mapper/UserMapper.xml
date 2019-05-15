@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间  用于区分不同xml文件中的id
+一般使用包名+类名-->
+<mapper namespace="com.njwb.www.mapper.UserMapper">
+	<!--将从数据库表中查询的数据映射到对应的实体类中 
+	id随意写，要和下面的resultMap的值保持一致
+	type：具体的返回类型 -->
+	<resultMap type="UserWrapper" id="UserWrapper">
+		<id property="uId" column="u_Id"/>
+		<result property="uAccount" column="u_Account"/>
+		<result property="uPassword" column="u_Password"/>	
+		<result property="uName" column="u_Name"/>
+		<result property="uPhoneNumber" column="u_PhoneNumber"/>
+		<result property="uPId" column="u_PId"/>
+		<result property="uState" column="u_State"/>
+		<result property="uRole" column="u_Role"/>
+		<result property="uPhoneBalance" column="u_PhoneBalance"/>
+		<result property="uJoyBeanBalance" column="u_JoyBeanBalance"/>
+		<result property="uCreateTime" column="u_CreateTime"/>	
+		<association property="province" javaType="Province" column="u_PId">
+			<id property="pId" column="p_Id"/>
+			<result property="pAreaCode" column="p_AreaCode"/>
+			<result property="pDistrictName" column="p_DistrictName"/>
+		</association>
+	</resultMap>
+	
+	<resultMap type="User" id="User">
+		<id property="uId" column="u_Id"/>
+		<result property="uAccount" column="u_Account"/>
+		<result property="uPassword" column="u_Password"/>
+		<result property="uName" column="u_Name"/>
+		<result property="uPhoneNumber" column="u_PhoneNumber"/>
+		<result property="uPId" column="u_PId"/>
+		<result property="uState" column="u_State"/>
+		<result property="uRole" column="u_Role"/>
+		<result property="uPhoneBalance" column="u_PhoneBalance"/>
+		<result property="uJoyBeanBalance" column="u_JoyBeanBalance"/>
+		<result property="uCreateTime" column="u_CreateTime"/>	
+	</resultMap>
+	
+	<!-- id随意命名，必须保证在同一个xml中唯一 
+	如果sql需要用到传入参数 parameterType
+	此处传Dept，包名+类名
+	#{}是占位符的意思-->
+	<insert id="addUser" parameterType="User">
+		insert into t_user_yl(u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,u_CreateTime) values
+		(seq_t_user_yl.nextval,#{uAccount},#{uPassword},#{uName},#{uPhoneNumber},#{uPId},sysdate)
+	</insert>
+	
+	<update id="updateUStateByUId" parameterType="User">
+		update t_user_yl set u_State = #{uState} where u_Id = #{uId}
+	</update>
+	
+	<update id="updatePhoneBalanceByUId" parameterType="Map">
+		update t_user_yl set u_PhoneBalance = #{uPhoneBalance} where u_Id = #{uId}
+	</update>
+	
+	<update id="updateUserBalanceByUId" parameterType="User">
+		update t_user_yl set u_PhoneBalance = #{uPhoneBalance},u_JoyBeanBalance = #{uJoyBeanBalance} where u_Id = #{uId}
+	</update>
+	
+	<!--parameterType表示传参
+	resultMap表示返回类型  -->
+	<select id="queryUserByUId" parameterType="int" resultMap="User">
+		select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime from t_user_yl where u_Id = #{uId}
+	</select>
+	
+	<select id="queryUserByUAccount" parameterType="String" resultMap="User">
+		select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime from t_user_yl where u_Account = #{uAccount}
+	</select>
+	
+	<select id="queryCount" resultType="int">
+		select count(*) from t_user_yl tu inner join t_province_yl tp on tu.u_PId = tp.p_Id 
+	</select>
+	
+	<select id="queryAllUserWrapperByPage" parameterType="Map" resultMap="UserWrapper">
+		select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,p_DistrictName,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime from 
+		(select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,p_DistrictName,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime,rownum as rn 
+		from t_user_yl tu inner join t_province_yl tp on tu.u_PId = tp.p_Id order by u_Id)
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryCountByUAccountAndUNameAndUPhoneNumber" parameterType="Map" resultType="int">
+		select count(*) from t_user_yl tu inner join t_province_yl tp on tu.u_PId = tp.p_Id 
+			<where>
+				<if test="uAccount != null">
+					and tu.u_Account like #{uAccount}
+				</if>
+				<if test="uName != null">
+					and tu.u_Name like #{uName}
+				</if>
+				<if test="uPhoneNumber != null">
+					and tu.u_PhoneNumber like #{uPhoneNumber}
+				</if>
+			</where>
+	</select>
+	
+	<select id="queryAllByUAccountAndUNameAndUPhoneNumberByPage" parameterType="Map" resultMap="UserWrapper">
+		select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,p_DistrictName,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime from 
+		(select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,p_DistrictName,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime,rownum as rn 
+		from t_user_yl tu inner join t_province_yl tp on tu.u_PId = tp.p_Id 
+			<where>
+				<if test="uAccount != null">
+					and tu.u_Account like #{uAccount}
+				</if>
+				<if test="uName != null">
+					and tu.u_Name like #{uName}
+				</if>
+				<if test="uPhoneNumber != null">
+					and tu.u_PhoneNumber like #{uPhoneNumber}
+				</if>
+			</where>	
+		order by u_Id) 
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryAllUserWrapper" resultMap="UserWrapper">
+		select u_Id,u_Account,u_Password,u_Name,u_PhoneNumber,u_PId,p_DistrictName,u_State,u_Role,u_PhoneBalance,u_JoyBeanBalance,u_CreateTime
+		from t_user_yl tu inner join t_province_yl tp on tu.u_PId = tp.p_Id
+	</select>
+</mapper>

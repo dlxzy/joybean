@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间  用于区分不同xml文件中的id
+一般使用包名+类名-->
+<mapper namespace="com.njwb.www.mapper.ConvertRatioMapper">
+	<!--将从数据库表中查询的数据映射到对应的实体类中 
+	id随意写，要和下面的resultMap的值保持一致
+	type：具体的返回类型 -->
+	<resultMap type="ConvertRatioWrapper" id="ConvertRatioWrapper">
+		<id property="crId" column="cr_Id"/>
+		<result property="crPId" column="cr_PId"/>
+		<result property="crConsumeAmount" column="cr_ConsumeAmount"/>
+		<result property="crCreateTime" column="cr_CreateTime"/>
+		<result property="crUpdateTime" column="cr_UpdateTime"/>
+		<association property="province" javaType="Province" column="cr_PId">
+			<id property="pId" column="p_Id"/>
+			<result property="pAreaCode" column="p_AreaCode"/>
+			<result property="pDistrictName" column="p_DistrictName"/>
+		</association>
+	</resultMap>
+	
+	<resultMap type="ConvertRatio" id="ConvertRatio">
+		<id property="crId" column="cr_Id"/>
+		<result property="crPId" column="cr_PId"/>
+		<result property="crConsumeAmount" column="cr_ConsumeAmount"/>
+		<result property="crCreateTime" column="cr_CreateTime"/>
+		<result property="crUpdateTime" column="cr_UpdateTime"/>
+	</resultMap>
+	
+	<!-- id随意命名，必须保证在同一个xml中唯一 
+	如果sql需要用到传入参数 parameterType
+	此处传Dept，包名+类名
+	#{}是占位符的意思-->
+	<insert id="addConvertRatio" parameterType="ConvertRatio">
+		insert into t_convertRatio_yl(cr_Id,cr_PId,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime) values(seq_t_convertRatio_yl.nextval,#{crPId},#{crConsumeAmount},sysdate,sysdate)
+	</insert>
+	
+	<delete id="delConvertRatioByCrId" parameterType="int">
+		delete from t_convertRatio_yl where cr_Id = #{crId}
+	</delete>
+	
+	<update id="updateConvertRatioByCrId" parameterType="ConvertRatio">
+		update t_convertRatio_yl set cr_ConsumeAmount = #{crConsumeAmount},cr_UpdateTime = sysdate where cr_Id = #{crId}
+	</update>
+	
+	<!--parameterType表示传参
+	resultMap表示返回类型  -->
+	<select id="queryConvertRatioByCrId" parameterType="int" resultMap="ConvertRatio">
+		select cr_Id,cr_PId,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime from t_convertRatio_yl where cr_Id = #{crId}
+	</select>
+	
+	<select id="queryConvertRatioByCrPId" parameterType="int" resultMap="ConvertRatio">
+		select cr_Id,cr_PId,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime from t_convertRatio_yl where cr_PId = #{crPId}
+	</select>
+	
+	<select id="queryCount" resultType="int">
+		select count(*) from t_convertRatio_yl tc inner join t_province_yl tp on tc.cr_PId = tp.p_Id 
+	</select>
+	
+	<select id="queryAllConvertRatioWrapperByPage" parameterType="Map" resultMap="ConvertRatioWrapper">
+		select cr_Id,cr_PId,p_DistrictName,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime from
+		(select cr_Id,cr_PId,p_DistrictName,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime,rownum as rn  from 
+		t_convertRatio_yl tc inner join t_province_yl tp on tc.cr_PId = tp.p_Id order by cr_Id) 
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryCountByPDistrictName" parameterType="province" resultType="int">
+		select count(*) from t_convertRatio_yl tc
+		inner join t_province_yl tp on tc.cr_PId = tp.p_Id 
+			<where>
+				<if test="pDistrictName != null">
+					and tp.p_DistrictName like #{pDistrictName}
+				</if>
+			</where>
+	</select>
+	
+	<select id="queryAllByPDistrictNameByPage" parameterType="Map" resultMap="ConvertRatioWrapper">
+		select cr_Id,cr_PId,p_DistrictName,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime from
+		(select cr_Id,cr_PId,p_DistrictName,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime,rownum as rn  from t_convertRatio_yl tc inner join t_province_yl tp on tc.cr_PId = tp.p_Id 
+		<where>
+			<if test="pDistrictName != null">
+				and tp.p_DistrictName like #{pDistrictName}
+			</if>
+		</where>	
+		order by cr_Id) 
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryAllConvertRatioWrapper" resultMap="ConvertRatioWrapper">
+		select cr_Id,cr_PId,p_DistrictName,cr_ConsumeAmount,cr_CreateTime,cr_UpdateTime from t_convertRatio_yl tc inner join t_province_yl tp on tc.cr_PId = tp.p_Id 
+	</select>
+</mapper>

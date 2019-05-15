@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<!-- 引入db.properties配置文件 -->
+	<context:property-placeholder location="classpath:db.properties"/>
+	
+	<!-- 打开注解，会扫描整个com.njwb.www包和它的子包所有的注解 -->
+	<context:component-scan base-package="com.njwb.www"/>
+	
+	<!-- 通过spring框架来实例化mybatis的sqlSessionFactory对象 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" scope="prototype">
+		<!-- 关联mybatis的主配置文件 -->
+		<property name="configLocation" value="classpath:sqlMapConfig.xml"/>
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!-- 配置数据库源，使用c3p0由spring框架管理 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${db.driver}"/>
+		<property name="jdbcUrl" value="${db.url}"/>
+		<property name="user" value="${db.username}"/>
+		<property name="password" value="${db.password}"/>
+	</bean>
+	
+	<!-- 配置事务 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- name必须和DataSourceTransactionManager类中的属性名保持一致 -->
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!-- 开启事务注解 -->
+	<tx:annotation-driven transaction-manager="txManager"/>
+	
+	<!-- 批量处理实例化xxxMapper对象 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+		<!-- 代理的接口 -->
+		<property name="basePackage" value="com.njwb.www.mapper"/>
+	</bean>
+</beans>

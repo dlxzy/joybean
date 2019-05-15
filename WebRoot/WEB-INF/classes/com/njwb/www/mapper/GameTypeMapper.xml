@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间  用于区分不同xml文件中的id
+一般使用包名+类名-->
+<mapper namespace="com.njwb.www.mapper.GameTypeMapper">
+	<!--将从数据库表中查询的数据映射到对应的实体类中 
+	id随意写，要和下面的resultMap的值保持一致
+	type：具体的返回类型 -->
+	<resultMap type="GameType" id="GameType">
+		<id property="gtId" column="gt_Id"/>
+		<result property="gtName" column="gt_Name"/>
+		<result property="gtState" column="gt_State"/>
+		<result property="gtCreateTime" column="gt_CreateTime"/>
+		<result property="gtUpdateTime" column="gt_UpdateTime"/>
+	</resultMap>
+	
+	<!-- id随意命名，必须保证在同一个xml中唯一 
+	如果sql需要用到传入参数 parameterType
+	此处传Dept，包名+类名
+	#{}是占位符的意思-->
+	<insert id="addGameType" parameterType="GameType">
+		insert into t_gametype_yl(gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime) values(seq_t_gameType_yl.nextval,#{gtName},#{gtState},sysdate,sysdate)
+	</insert>
+	
+	<update id="updateGameTypeByGtId" parameterType="GameType">
+		update t_gametype_yl set gt_Name = #{gtName},gt_State = #{gtState},gt_UpdateTime = sysdate where gt_Id = #{gtId}
+	</update>
+	
+	<!--parameterType表示传参
+	resultMap表示返回类型  -->
+	<select id="queryGameTypeByGtId" parameterType="int" resultMap="GameType">
+		select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime from t_gametype_yl where gt_Id = #{gtId}
+	</select>
+	
+	<select id="queryGameTypeByGtName" parameterType="String" resultMap="GameType">
+		select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime from t_gametype_yl where gt_Name = #{gtName}
+	</select>
+	
+	<select id="queryCount" resultType="int">
+		select count(*) from t_gametype_yl	
+	</select>	
+	
+	<select id="queryAllGameTypeByPage" parameterType="Map" resultMap="GameType">
+		select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime from
+		(select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime,rownum as rn from t_gametype_yl order by gt_Id) 
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryCountByGtNameAndGtState" parameterType="Map" resultType="int">
+		select count(*) from t_gametype_yl
+		<where>
+			<if test="gtName != null">
+				and gt_Name like #{gtName}
+			</if>
+			<if test="gtState != null">
+				and gt_State like #{gtState}
+			</if>
+		</where>	
+	</select>
+	
+	<select id="queryAllByGtNameAndGtStateByPage" parameterType="Map" resultMap="GameType">
+		select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime from
+		(select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime,rownum as rn from t_gametype_yl
+		<where>
+			<if test="gtName != null">
+				and gt_Name like #{gtName}
+			</if>
+			<if test="gtState != null">
+				and gt_State like #{gtState}
+			</if>
+		</where>	
+		order by gt_Id) 
+		<![CDATA[
+		where rn > ((#{pageNo}-1) * #{pageSize}) and rn <= (#{pageNo} * #{pageSize})
+		]]>
+	</select>
+	
+	<select id="queryAllByGtState" parameterType="int" resultMap="GameType">
+		select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime from t_gametype_yl where gt_State = #{gtState}
+	</select>
+	
+	<select id="queryAllGameType" resultMap="GameType">
+		select gt_Id,gt_Name,gt_State,gt_CreateTime,gt_UpdateTime from t_gametype_yl
+	</select>
+</mapper>

@@ -1,0 +1,77 @@
+@CHARSET "UTF-8";
+
+#login {
+	width: 440px;
+	height: 340px;
+	border: 1px solid black;
+	margin: 100px auto;
+	background-color: white;
+}
+
+#title {
+	width: 400px;
+	height: 40px;
+	line-height: 40px;
+	margin: 10px auto;
+	border: 1px solid #2299EE;
+	text-align: center;
+	background-color: #2299EE;
+	letter-spacing: 0.5em;
+	color: white;
+	font-size: 20px;
+}
+
+#loginTable {
+	margin: 10px auto;
+	border-spacing:20px 10px;
+	
+}
+
+#loginTable td{	
+	width:120px;
+	height:40px;
+	
+}
+
+.left{
+	border: 1px solid black;
+	background-color:#F0F0F0;
+	font-size:18px;
+	text-align:center;
+	height:40px;
+	line-height:40px;
+}
+
+.btn {
+	width:100px;
+	background-color: #2299EE;
+	font-size: 18px;
+	color: white;
+}
+
+body {
+	background:url(img/xk.gif) no-repeat;
+	background-size:100% 117%;
+}
+
+input[type='text']{
+	width:180px;
+
+}
+
+input[type='password']{
+	width:180px;
+
+}
+
+#img,#txt{
+	float:left;
+}
+
+#txt{
+	margin-right:10px;
+}
+
+input{
+	height:100%;
+}
